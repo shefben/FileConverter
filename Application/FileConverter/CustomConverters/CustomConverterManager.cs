@@ -1,6 +1,8 @@
+
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression; // ZipArchive & extensions<br>using System.Text; // Encoding
 using System.Reflection;
 
 namespace FileConverter.CustomConverters
@@ -154,11 +156,30 @@ namespace FileConverter.CustomConverters
 
         public static void Import(string package)
         {
-            string directory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "CustomConverters");
+            string directory = Path.Combine(
+                Path.GetDirectoryName(
+                    Assembly.GetExecutingAssembly().Location
+                ), "CustomConverters");
             Directory.CreateDirectory(directory);
-            System.IO.Compression.ZipFile.ExtractToDirectory(package, directory, true);
+
+            using (var archive = ZipFile.OpenRead(package))
+            {
+                foreach (var entry in archive.Entries)
+                {
+                    // recombine the entry name to a full path under `directory`
+                    string filePath = Path.Combine(directory, entry.FullName);
+
+                    // ensure the directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+                    // overwrite if already present
+                    entry.ExtractToFile(filePath, overwrite: true);
+                }
+            }
+
             converters = null;
             ConvertersUpdated?.Invoke();
         }
+
     }
 }
