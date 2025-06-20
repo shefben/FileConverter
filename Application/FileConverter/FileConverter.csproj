@@ -94,6 +94,8 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="yeti.mmedia">
       <HintPath>..\..\Middleware\yeti.mmedia.dll</HintPath>
     </Reference>
@@ -123,6 +125,10 @@
     <Compile Include="ConversionJobs\ConversionJob_Excel.cs" />
     <Compile Include="ConversionJobs\ConversionJob_Word.cs" />
     <Compile Include="ConversionJobs\ConversionJob_ImageMagick.cs" />
+    <Compile Include="ConversionJobs\ConversionJob_Custom.cs" />
+    <Compile Include="CustomConverters\CustomConverterDefinition.cs" />
+    <Compile Include="CustomConverters\CustomConverterOptionDefinition.cs" />
+    <Compile Include="CustomConverters\CustomConverterManager.cs" />
     <Compile Include="ConversionJobs\ConversionState.cs" />
     <Compile Include="ConversionJobs\VideoEncodingSpeed.cs" />
     <Compile Include="ConversionPreset\ConversionSettingsOverride.cs" />
@@ -176,6 +182,8 @@
     <Compile Include="ValueConverters\Generic\FormatStringConverter.cs" />
     <Compile Include="ValueConverters\Generic\ValueToString.cs" />
     <Compile Include="ValueConverters\Generic\StringToValueType.cs" />
+    <Compile Include="ValueConverters\CustomOptionValueConverter.cs" />
+    <Compile Include="ValueConverters\OptionVisibilityConverter.cs" />
     <Compile Include="ValueConverters\InputTypesToBool.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ValueConverters\OutputTypeToVisibility.cs" />
@@ -195,6 +203,18 @@
     </Compile>
     <Compile Include="Views\DiagnosticsWindow.xaml.cs">
       <DependentUpon>DiagnosticsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\CustomConverterWizardViewModel.cs" />
+    <Compile Include="Views\CustomConverterWizard.xaml.cs">
+      <DependentUpon>CustomConverterWizard.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\CustomOptionEditorViewModel.cs" />
+    <Compile Include="ViewModels\ManageCustomConvertersViewModel.cs" />
+    <Compile Include="Views\CustomOptionEditor.xaml.cs">
+      <DependentUpon>CustomOptionEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ManageCustomConvertersWindow.xaml.cs">
+      <DependentUpon>ManageCustomConvertersWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\InputExtension.cs" />
     <Compile Include="ViewModels\InputExtensionCategory.cs" />
@@ -251,6 +271,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\SettingsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CustomOptionEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ManageCustomConvertersWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CustomConverterWizard.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
