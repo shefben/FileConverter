@@ -20,6 +20,8 @@ namespace FileConverter.Services
             // Load settigns.
             Debug.Log("Load settings...");
             this.Settings = this.Load();
+
+            CustomConverters.CustomConverterManager.ConvertersUpdated += this.OnConvertersUpdated;
         }
 
         public Settings Settings
@@ -180,6 +182,39 @@ namespace FileConverter.Services
                 }
             }
 
+            if (settings != null)
+            {
+                foreach (var def in CustomConverters.CustomConverterManager.Converters)
+                {
+                    bool exists = false;
+                    foreach (var preset in settings.ConversionPresets)
+                    {
+                        if (preset.CustomConverterName == def.Name)
+                        {
+                            exists = true;
+                            break;
+                        }
+                    }
+
+                    if (!exists)
+                    {
+                        var preset = new ConversionPreset(def.Name, OutputType.Custom, def.Extensions);
+                        preset.CustomConverterName = def.Name;
+                        preset.InputPostConversionAction = def.PostAction;
+                        foreach (var opt in def.Options)
+                        {
+                            string defaultValue = opt.DefaultValue;
+                            if (string.IsNullOrEmpty(defaultValue) && opt.Items.Count > 0)
+                            {
+                                defaultValue = opt.Items[0].Value;
+                            }
+                            preset.InitializeSettingsValue(opt.Name, defaultValue ?? string.Empty, true);
+                        }
+                        settings.ConversionPresets.Add(preset);
+                    }
+                }
+            }
+
             return settings;
         }
 
@@ -200,6 +235,50 @@ namespace FileConverter.Services
             File.Delete(this.UserSettingsTemporaryFilePath);
 
             return true;
+        }
+
+        private void OnConvertersUpdated()
+        {
+            this.UpdateCustomPresets();
+        }
+
+        private void UpdateCustomPresets()
+        {
+            if (this.Settings == null || this.Settings.ConversionPresets == null)
+            {
+                return;
+            }
+
+            foreach (var def in CustomConverters.CustomConverterManager.Converters)
+            {
+                bool exists = false;
+                foreach (var preset in this.Settings.ConversionPresets)
+                {
+                    if (preset.CustomConverterName == def.Name)
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if (!exists)
+                {
+                    var preset = new ConversionPreset(def.Name, OutputType.Custom, def.Extensions);
+                    preset.CustomConverterName = def.Name;
+                    preset.InputPostConversionAction = def.PostAction;
+                    preset.OutputFileNameTemplate = def.OutputTemplate;
+                    foreach (var opt in def.Options)
+                    {
+                        string defaultValue = opt.DefaultValue;
+                        if (string.IsNullOrEmpty(defaultValue) && opt.Items.Count > 0)
+                        {
+                            defaultValue = opt.Items[0].Value;
+                        }
+                        preset.InitializeSettingsValue(opt.Name, defaultValue ?? string.Empty, true);
+                    }
+                    this.Settings.ConversionPresets.Add(preset);
+                }
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ namespace FileConverter.ViewModels
     using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
+    using System.Reflection;
     using System.Windows.Data;
     using System.Windows.Input;
 
@@ -21,6 +22,7 @@ namespace FileConverter.ViewModels
     using FileConverter.Annotations;
     using FileConverter.Services;
     using FileConverter.Views;
+    using FileConverter.CustomConverters;
 
     /// <summary>
     /// This class contains properties that the settings View can data bind to.
@@ -38,6 +40,8 @@ namespace FileConverter.ViewModels
         private RelayCommand getChangeLogContentCommand;
         private RelayCommand createFolderCommand;
         private RelayCommand newPresetCommand;
+        private RelayCommand addCustomConverterCommand;
+        private RelayCommand manageCustomConvertersCommand;
         private RelayCommand duplicatePresetCommand;
         private RelayCommand importPresetCommand;
         private RelayCommand exportPresetCommand;
@@ -61,6 +65,8 @@ namespace FileConverter.ViewModels
             this.openUrlCommand = new RelayCommand<string>((url) => Process.Start(url));
             this.createFolderCommand = new RelayCommand(this.CreateFolder);
             this.newPresetCommand = new RelayCommand(() => this.AddNewPreset(false));
+            this.addCustomConverterCommand = new RelayCommand(this.AddCustomConverter);
+            this.manageCustomConvertersCommand = new RelayCommand(this.ManageCustomConverters);
             this.duplicatePresetCommand = new RelayCommand(() => this.AddNewPreset(true), this.CanDuplicateSelectedPreset);
             this.importPresetCommand = new RelayCommand(this.ImportPreset);
             this.exportPresetCommand = new RelayCommand(this.ExportSelectedPreset, this.CanExportSelectedPreset);
@@ -88,6 +94,7 @@ namespace FileConverter.ViewModels
             outputTypeViewModels.Add(new OutputTypeViewModel(OutputType.Ico));
             outputTypeViewModels.Add(new OutputTypeViewModel(OutputType.Gif));
             outputTypeViewModels.Add(new OutputTypeViewModel(OutputType.Pdf));
+            outputTypeViewModels.Add(new OutputTypeViewModel(OutputType.Custom));
             this.outputTypes = new ListCollectionView(outputTypeViewModels);
             this.outputTypes.GroupDescriptions.Add(new PropertyGroupDescription("Category"));
 
@@ -275,6 +282,9 @@ namespace FileConverter.ViewModels
         public ICommand CreateFolderCommand => this.createFolderCommand;
 
         public ICommand AddNewPresetCommand => this.newPresetCommand;
+
+        public ICommand AddCustomConverterCommand => this.addCustomConverterCommand;
+        public ICommand ManageCustomConvertersCommand => this.manageCustomConvertersCommand;
 
         public ICommand DuplicatePresetCommand => this.duplicatePresetCommand;
 
@@ -584,12 +594,63 @@ namespace FileConverter.ViewModels
 
             this.SelectedItem = node;
 
-            this.OnPresetCreated.Invoke();
+            this.OnPresetCreated?.Invoke();
 
             this.removePresetCommand.NotifyCanExecuteChanged();
             this.saveCommand.NotifyCanExecuteChanged();
         }
 
+        private void AddCustomConverter()
+        {
+            var wizard = new Views.CustomConverterWizard()
+            {
+                DataContext = new CustomConverterWizardViewModel()
+            };
+
+            if (wizard.ShowDialog() == true && wizard.DataContext is CustomConverterWizardViewModel vm)
+            {
+                var def = vm.Definition;
+                string directory = CustomConverterManager.GetDirectory();
+                System.IO.Directory.CreateDirectory(directory);
+                string filePath = System.IO.Path.Combine(directory, def.Name + ".xml");
+                XmlHelpers.SaveToFile("CustomConverter", filePath, def);
+
+                PresetFolderNode parent = this.SelectedFolder ?? this.presetsRootFolder;
+                int insertIndex = parent.Children.IndexOf(this.SelectedItem) + 1;
+                if (insertIndex < 0)
+                {
+                    insertIndex = parent.Children.Count;
+                }
+
+                var preset = new ConversionPreset(def.Name, OutputType.Custom, def.Extensions);
+                preset.CustomConverterName = def.Name;
+                preset.InputPostConversionAction = def.PostAction;
+                preset.OutputFileNameTemplate = def.OutputTemplate;
+                foreach (var opt in def.Options)
+                {
+                    string defaultValue = opt.DefaultValue;
+                    if (string.IsNullOrEmpty(defaultValue) && opt.Items.Count > 0)
+                    {
+                        defaultValue = opt.Items[0].Value;
+                    }
+                    preset.InitializeSettingsValue(opt.Name, defaultValue ?? string.Empty, true);
+                }
+
+                PresetNode node = new PresetNode(preset, parent);
+                parent.Children.Insert(insertIndex, node);
+                node.PropertyChanged += this.NodePropertyChanged;
+                this.SelectedItem = node;
+                this.OnPresetCreated?.Invoke();
+            }
+        }
+
+        private void ManageCustomConverters()
+        {
+            var vm = new ManageCustomConvertersViewModel();
+            var wnd = new Views.ManageCustomConvertersWindow { DataContext = vm };
+            wnd.ShowDialog();
+        }
+        
         private void ImportPreset()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog

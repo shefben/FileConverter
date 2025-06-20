@@ -22,5 +22,7 @@ namespace FileConverter
         Wav,
         Webm,
         Webp,
+
+        Custom,
     }
 }
