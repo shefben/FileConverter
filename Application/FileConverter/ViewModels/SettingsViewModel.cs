@@ -594,7 +594,7 @@ namespace FileConverter.ViewModels
 
             this.SelectedItem = node;
 
-            this.OnPresetCreated.Invoke();
+            this.OnPresetCreated?.Invoke();
 
             this.removePresetCommand.NotifyCanExecuteChanged();
             this.saveCommand.NotifyCanExecuteChanged();
@@ -610,7 +610,7 @@ namespace FileConverter.ViewModels
             if (wizard.ShowDialog() == true && wizard.DataContext is CustomConverterWizardViewModel vm)
             {
                 var def = vm.Definition;
-                string directory = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "CustomConverters");
+                string directory = CustomConverterManager.GetDirectory();
                 System.IO.Directory.CreateDirectory(directory);
                 string filePath = System.IO.Path.Combine(directory, def.Name + ".xml");
                 XmlHelpers.SaveToFile("CustomConverter", filePath, def);

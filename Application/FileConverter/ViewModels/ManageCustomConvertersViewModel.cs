@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FileConverter.CustomConverters;
+using FileConverter.Services;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -12,10 +14,13 @@ namespace FileConverter.ViewModels
     public class ManageCustomConvertersViewModel : ObservableObject
     {
         private CustomConverterDefinition selected;
+        private ConversionPreset selectedCustomPreset;
 
         public ManageCustomConvertersViewModel()
         {
             this.Converters = new ObservableCollection<CustomConverterDefinition>(CustomConverterManager.Converters);
+            var settings = Ioc.Default.GetRequiredService<ISettingsService>().Settings;
+            this.CustomPresets = new ObservableCollection<ConversionPreset>(settings.ConversionPresets.Where(p => p.OutputType == OutputType.Custom));
             CustomConverterManager.ConvertersUpdated += () =>
             {
                 this.Converters = new ObservableCollection<CustomConverterDefinition>(CustomConverterManager.Converters);
@@ -25,6 +30,7 @@ namespace FileConverter.ViewModels
             this.editCommand = new RelayCommand(this.EditSelected, () => this.Selected != null);
             this.importCommand = new RelayCommand(this.ImportConverter);
             this.exportCommand = new RelayCommand(this.ExportSelected, () => this.Selected != null);
+            this.addCommand = new RelayCommand(this.AddConverter);
         }
 
         public ObservableCollection<CustomConverterDefinition> Converters { get; private set; }
@@ -51,6 +57,16 @@ namespace FileConverter.ViewModels
         public ICommand ImportCommand => this.importCommand;
         private readonly RelayCommand exportCommand;
         public ICommand ExportCommand => this.exportCommand;
+        private readonly RelayCommand addCommand;
+        public ICommand AddCommand => this.addCommand;
+
+        public ObservableCollection<ConversionPreset> CustomPresets { get; private set; }
+
+        public ConversionPreset SelectedCustomPreset
+        {
+            get => this.selectedCustomPreset;
+            set => this.SetProperty(ref this.selectedCustomPreset, value);
+        }
 
         private void RemoveSelected()
         {
@@ -106,6 +122,18 @@ namespace FileConverter.ViewModels
             if (dlg.ShowDialog() == true)
             {
                 CustomConverterManager.Export(this.Selected.Name, dlg.FileName);
+            }
+        }
+
+        private void AddConverter()
+        {
+            var vm = new CustomConverterWizardViewModel();
+            var wnd = new Views.CustomConverterWizard { DataContext = vm };
+            if (wnd.ShowDialog() == true)
+            {
+                CustomConverterManager.SaveConverter(vm.Definition);
+                this.Converters.Add(vm.Definition);
+                this.Selected = vm.Definition;
             }
         }
     }

@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 namespace FileConverter.CustomConverters
 {
     [XmlRoot("CustomConverter")]
-    public class CustomConverterDefinition : IXmlSerializable
+    public class CustomConverterDefinition : FileConverter.IXmlSerializable
     {
         [XmlElement("Name")]
         public string Name { get; set; }
@@ -39,7 +39,7 @@ namespace FileConverter.CustomConverters
                     return null;
                 }
 
-                string directory = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "CustomConverters");
+                string directory = CustomConverterManager.GetDirectory();
                 return System.IO.Path.Combine(directory, this.IconPath);
             }
         }

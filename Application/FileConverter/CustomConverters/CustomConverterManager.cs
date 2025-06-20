@@ -1,8 +1,6 @@
-
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression; // ZipArchive & extensions<br>using System.Text; // Encoding
 using System.Reflection;
 
 namespace FileConverter.CustomConverters
@@ -35,6 +33,12 @@ namespace FileConverter.CustomConverters
             return def;
         }
 
+        internal static string GetDirectory()
+        {
+            string dir = Path.Combine(FileConverterExtension.PathHelpers.GetUserDataFolderPath, "CustomConverters");
+            return dir;
+        }
+
         private static void EnsureLoaded()
         {
             if (converters != null)
@@ -45,7 +49,7 @@ namespace FileConverter.CustomConverters
             converters = new Dictionary<string, CustomConverterDefinition>(StringComparer.OrdinalIgnoreCase);
             try
             {
-                string directory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "CustomConverters");
+                string directory = GetDirectory();
                 if (!Directory.Exists(directory))
                 {
                     return;
@@ -105,7 +109,7 @@ namespace FileConverter.CustomConverters
             }
 
             EnsureLoaded();
-            string directory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "CustomConverters");
+            string directory = GetDirectory();
             Directory.CreateDirectory(directory);
             string file = Path.Combine(directory, def.Name + ".xml");
             XmlHelpers.SaveToFile("CustomConverter", file, def);
@@ -115,7 +119,7 @@ namespace FileConverter.CustomConverters
         public static void RemoveConverter(string name)
         {
             EnsureLoaded();
-            string directory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "CustomConverters");
+            string directory = GetDirectory();
             string file = Path.Combine(directory, name + ".xml");
             if (File.Exists(file))
             {
@@ -133,7 +137,7 @@ namespace FileConverter.CustomConverters
                 return;
             }
 
-            string directory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "CustomConverters");
+            string directory = GetDirectory();
             string xmlPath = Path.Combine(directory, name + ".xml");
 
             using (var zip = System.IO.Compression.ZipFile.Open(destination, System.IO.Compression.ZipArchiveMode.Create))
@@ -156,30 +160,11 @@ namespace FileConverter.CustomConverters
 
         public static void Import(string package)
         {
-            string directory = Path.Combine(
-                Path.GetDirectoryName(
-                    Assembly.GetExecutingAssembly().Location
-                ), "CustomConverters");
+            string directory = GetDirectory();
             Directory.CreateDirectory(directory);
-
-            using (var archive = ZipFile.OpenRead(package))
-            {
-                foreach (var entry in archive.Entries)
-                {
-                    // recombine the entry name to a full path under `directory`
-                    string filePath = Path.Combine(directory, entry.FullName);
-
-                    // ensure the directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-
-                    // overwrite if already present
-                    entry.ExtractToFile(filePath, overwrite: true);
-                }
-            }
-
+            System.IO.Compression.ZipFile.ExtractToDirectory(package, directory, true);
             converters = null;
             ConvertersUpdated?.Invoke();
         }
-
     }
 }
