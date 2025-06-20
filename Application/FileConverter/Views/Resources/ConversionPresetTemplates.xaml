@@ -4,6 +4,7 @@
                     xmlns:valueConverters="clr-namespace:FileConverter.ValueConverters"
                     xmlns:project="clr-namespace:FileConverter.Properties"
                     xmlns:controls="clr-namespace:FileConverter.Controls"
+                    xmlns:converters="clr-namespace:FileConverter.CustomConverters"
                     xmlns:globalization="clr-namespace:System.Globalization;assembly=mscorlib"
                     xmlns:views="clr-namespace:FileConverter.Views"
                     xmlns:fileConverter="clr-namespace:FileConverter"
@@ -21,6 +22,8 @@
     <valueConverters:OutputTypeEnumToViewModel x:Key="OutputTypeEnumToViewModel"/>
     <valueConverters:ConversionSettingsRelevant x:Key="ConversionSettingsRelevant"/>
     <valueConverters:HardwareAccelerationModeToString x:Key="HardwareAccelerationModeToString"/>
+    <valueConverters:CustomOptionValueConverter x:Key="CustomOptionValueConverter"/>
+    <valueConverters:OptionVisibilityConverter x:Key="OptionVisibilityConverter"/>
 
     <generic:ValueConverterGroup x:Key="ConversionSettingsToEnum">
         <valueConverters:ConversionSettingsToString/>
@@ -660,6 +663,9 @@
             <DataTrigger Binding="{Binding OutputType}" Value="Webp">
                 <Setter Property="ContentTemplate" Value="{StaticResource JpgSettingsDataTemplate}"/>
             </DataTrigger>
+            <DataTrigger Binding="{Binding OutputType}" Value="Custom">
+                <Setter Property="ContentTemplate" Value="{StaticResource CustomConverterSettingsDataTemplate}"/>
+            </DataTrigger>
         </Style.Triggers>
     </Style>
 
@@ -708,6 +714,63 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
+
+    <DataTemplate x:Key="CustomConverterOptionTemplate" DataType="{x:Type converters:CustomConverterOptionDefinition}">
+        <StackPanel Margin="0,5">
+            <StackPanel.Visibility>
+                <MultiBinding Converter="{StaticResource OptionVisibilityConverter}">
+                    <Binding />
+                    <Binding RelativeSource="{RelativeSource AncestorType=ItemsControl}" Path="DataContext" />
+                </MultiBinding>
+            </StackPanel.Visibility>
+            <TextBlock x:Name="Label" Text="{Binding DisplayName}" />
+            <ComboBox x:Name="Dropdown" Visibility="Collapsed" ItemsSource="{Binding Items}" SelectedValuePath="Value"
+                      SelectedValue="{Binding DataContext.Settings, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource CustomOptionValueConverter}, ConverterParameter={Binding}}"/>
+            <Slider x:Name="Slider" Visibility="Collapsed" Minimum="0" Maximum="{Binding Scale, Converter={StaticResource StringToValueType}, ConverterParameter=System.Double}"
+                    Value="{Binding DataContext.Settings, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource CustomOptionValueConverter}, ConverterParameter={Binding}}"/>
+            <TextBox x:Name="TextBox" Visibility="Collapsed" Text="{Binding DataContext.Settings, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource CustomOptionValueConverter}, ConverterParameter={Binding}}"/>
+            <CheckBox x:Name="Check" Visibility="Collapsed" Content="{Binding DisplayName}"
+                      IsChecked="{Binding DataContext.Settings, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource CustomOptionValueConverter}, ConverterParameter={Binding}}"/>
+            <RadioButton x:Name="Radio" Visibility="Collapsed" Content="{Binding DisplayName}" GroupName="{Binding Group}"
+                        IsChecked="{Binding DataContext.Settings, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource CustomOptionValueConverter}, ConverterParameter={Binding}}"/>
+        </StackPanel>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding ControlType}" Value="dropdown">
+                <Setter TargetName="Dropdown" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ControlType}" Value="slider">
+                <Setter TargetName="Slider" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ControlType}" Value="textbox">
+                <Setter TargetName="TextBox" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ControlType}" Value="checkbox">
+                <Setter TargetName="Check" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="Label" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ControlType}" Value="radio">
+                <Setter TargetName="Radio" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="Label" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <DataTemplate x:Key="CustomConverterSettingsDataTemplate" DataType="{x:Type fileConverter:ConversionPreset}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ItemsControl>
+                <ItemsControl.ItemsSource>
+                    <CollectionViewSource Source="{Binding CustomConverterDefinition.Options}" IsLiveGroupingRequested="True">
+                        <CollectionViewSource.GroupDescriptions>
+                            <PropertyGroupDescription PropertyName="Category" />
+                        </CollectionViewSource.GroupDescriptions>
+                    </CollectionViewSource>
+                </ItemsControl.ItemsSource>
+                <ItemsControl.ItemTemplate>
+                    <StaticResource ResourceKey="CustomConverterOptionTemplate" />
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DataTemplate>
 
 </ResourceDictionary>
     
