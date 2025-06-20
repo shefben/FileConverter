@@ -103,6 +103,7 @@ namespace FileConverter.Properties {
             get {
                 return ResourceManager.GetString("AddCustomConverter", resourceCulture);
             }
+        }
 
         /// <summary>
         ///   Looks up a localized string similar to Manage custom converters.
@@ -111,7 +112,6 @@ namespace FileConverter.Properties {
             get {
                 return ResourceManager.GetString("ManageCustomConverters", resourceCulture);
             }
-        }
         }
         
         /// <summary>

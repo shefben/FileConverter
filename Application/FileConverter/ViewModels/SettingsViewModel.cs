@@ -641,6 +641,7 @@ namespace FileConverter.ViewModels
                 node.PropertyChanged += this.NodePropertyChanged;
                 this.SelectedItem = node;
                 this.OnPresetCreated?.Invoke();
+            }
         }
 
         private void ManageCustomConverters()
