@@ -24,7 +24,7 @@ namespace FileConverter.ValueConverters
             OutputType outputFileExtension = (OutputType)values[1];
             string outputFileTemplate = values[2] as string;
 
-            return PathHelpers.GenerateFilePathFromTemplate(inputFilePath, outputFileExtension, outputFileTemplate, 1, 3);
+            return PathHelpers.GenerateFilePathFromTemplate(inputFilePath, outputFileExtension, outputFileTemplate, 1, 3, null);
         }
 
         public object[] ConvertBack(object value, Type[] targetType, object parameter, CultureInfo culture)

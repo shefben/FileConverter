@@ -23,6 +23,19 @@ If you encounter any problem with File Converter, you can:
 * See the already known problems in the [troubleshooting section of the documentation](https://github.com/Tichau/FileConverter/wiki/Troubleshooting).
 * Or report an issue on the [bug tracker](https://github.com/Tichau/FileConverter/issues).
 
+## Custom converters
+
+File Converter can load additional conversion presets from XML files placed in
+the `CustomConverters` folder next to the application. These definitions let you
+configure:
+
+* Supported input extensions and the output extension
+* The external program to run and its command line arguments
+* Optional variables and options that appear in the preset editor
+* Output filename templates, icons and post-processing commands
+
+See `Application/FileConverter/CustomConverters/sample.xml` for an example.
+
 ## Setup development environment
 
 ### Requirements
