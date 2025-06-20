@@ -578,7 +578,7 @@ namespace FileConverter
             this.OnPropertyChanged(nameof(this.Settings));
         }
 
-        private void InitializeSettingsValue(string settingsKey, string value, bool force = false)
+        public void InitializeSettingsValue(string settingsKey, string value, bool force = false)
         {
             if (string.IsNullOrEmpty(settingsKey))
             {

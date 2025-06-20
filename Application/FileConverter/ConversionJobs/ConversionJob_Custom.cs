@@ -30,13 +30,13 @@ namespace FileConverter.ConversionJobs
             {
                 foreach (var opt in this.definition.Options)
                 {
-                    if (!opt.EvaluateCondition(this.Preset))
+                    if (!opt.EvaluateCondition(this.ConversionPreset))
                     {
                         args = args.Replace("{" + opt.Name + "}", string.Empty);
                         continue;
                     }
 
-                    string value = this.Preset.GetSettingsValue(opt.Name) ?? string.Empty;
+                    string value = this.ConversionPreset.GetSettingsValue(opt.Name) ?? string.Empty;
                     args = args.Replace("{" + opt.Name + "}", value);
                 }
             }
