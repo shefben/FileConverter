@@ -10,6 +10,7 @@ namespace FileConverter
     using CommunityToolkit.Mvvm.ComponentModel;
 
     using FileConverter.Controls;
+    using FileConverter.CustomConverters;
 
     [XmlRoot]
     [XmlType]
@@ -22,6 +23,7 @@ namespace FileConverter
         private InputPostConversionAction inputPostConversionAction;
         private ConversionSettings settings = new ConversionSettings();
         private string outputFileNameTemplate;
+        private string customConverterName;
 
         public ConversionPreset()
         {
@@ -139,6 +141,28 @@ namespace FileConverter
         {
             get;
             set;
+        }
+
+        [XmlAttribute]
+        public string CustomConverterName
+        {
+            get => this.customConverterName;
+
+            set
+            {
+                this.customConverterName = value;
+                this.OnPropertyChanged();
+                this.OnPropertyChanged(nameof(this.CustomConverterDefinition));
+            }
+        }
+
+        [XmlIgnore]
+        public CustomConverters.CustomConverterDefinition CustomConverterDefinition
+        {
+            get
+            {
+                return CustomConverters.CustomConverterManager.GetConverter(this.customConverterName);
+            }
         }
 
         [XmlElement]
@@ -321,7 +345,14 @@ namespace FileConverter
 
         public string GenerateOutputFilePath(string inputFilePath, int numberIndex, int numberMax)
         {
-            return PathHelpers.GenerateFilePathFromTemplate(inputFilePath, this.OutputType, this.OutputFileNameTemplate, numberIndex, numberMax);
+            string customExtension = null;
+            if (!string.IsNullOrEmpty(this.CustomConverterName))
+            {
+                var def = CustomConverterManager.GetConverter(this.CustomConverterName);
+                customExtension = def?.OutputExtension;
+            }
+
+            return PathHelpers.GenerateFilePathFromTemplate(inputFilePath, this.OutputType, this.OutputFileNameTemplate, numberIndex, numberMax, customExtension);
         }
 
         public void SetSettingsValue(string settingsKey, string value)
@@ -547,7 +578,7 @@ namespace FileConverter
             this.OnPropertyChanged(nameof(this.Settings));
         }
 
-        private void InitializeSettingsValue(string settingsKey, string value, bool force = false)
+        public void InitializeSettingsValue(string settingsKey, string value, bool force = false)
         {
             if (string.IsNullOrEmpty(settingsKey))
             {

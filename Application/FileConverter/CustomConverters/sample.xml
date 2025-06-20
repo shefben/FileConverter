@@ -1,0 +1,17 @@
+<CustomConverter>
+    <Name>Sample Converter</Name>
+    <Extensions>
+        <Extension>abc</Extension>
+    </Extensions>
+    <OutputExtension>xyz</OutputExtension>
+    <Program>converter.exe</Program>
+    <Arguments>"{input}" "{output}"</Arguments>
+    <OutputTemplate>(p)(f)_converted</OutputTemplate>
+    <Icon>icon.png</Icon>
+    <PostProcessCommand>after.bat</PostProcessCommand>
+    <MultiFileAtOnce>false</MultiFileAtOnce>
+    <ShowProgram>false</ShowProgram>
+    <PostAction>None</PostAction>
+    <Variable name="quality" value="5" />
+    <Quality name="quality" control="slider" scale="10" value-type="int" value="5" />
+</CustomConverter>

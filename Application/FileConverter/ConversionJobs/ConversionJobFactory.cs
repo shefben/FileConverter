@@ -6,6 +6,15 @@ namespace FileConverter.ConversionJobs
     {
         public static ConversionJob Create(ConversionPreset conversionPreset, string inputFilePath)
         {
+            if (!string.IsNullOrEmpty(conversionPreset.CustomConverterName))
+            {
+                var def = CustomConverters.CustomConverterManager.GetConverter(conversionPreset.CustomConverterName);
+                if (def != null)
+                {
+                    return new ConversionJob_Custom(conversionPreset, inputFilePath, def);
+                }
+            }
+
             string inputFileExtension = System.IO.Path.GetExtension(inputFilePath);
             inputFileExtension = inputFileExtension.ToLowerInvariant().Substring(1, inputFileExtension.Length - 1);
             if (inputFileExtension == "cda")
