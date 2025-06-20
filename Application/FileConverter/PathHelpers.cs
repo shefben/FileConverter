@@ -139,7 +139,7 @@ namespace FileConverter
             return true;
         }
 
-        public static string GenerateFilePathFromTemplate(string inputFilePath, OutputType outputFileExtension, string outputFilePathTemplate, int numberIndex, int numberMax)
+        public static string GenerateFilePathFromTemplate(string inputFilePath, OutputType outputFileExtension, string outputFilePathTemplate, int numberIndex, int numberMax, string customOutputExtension = null)
         {
             if (string.IsNullOrEmpty(inputFilePath))
             {
@@ -148,7 +148,7 @@ namespace FileConverter
 
             string inputExtension = System.IO.Path.GetExtension(inputFilePath).Substring(1);
             string inputPathWithoutExtension = inputFilePath.Substring(0, inputFilePath.Length - inputExtension.Length - 1);
-            string outputExtension = outputFileExtension.ToString().ToLowerInvariant();
+            string outputExtension = customOutputExtension ?? outputFileExtension.ToString().ToLowerInvariant();
 
             if (string.IsNullOrEmpty(outputFilePathTemplate))
             {

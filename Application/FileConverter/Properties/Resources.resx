@@ -129,6 +129,12 @@
   <data name="AddNewPreset" xml:space="preserve">
     <value>New preset</value>
   </data>
+  <data name="AddCustomConverter" xml:space="preserve">
+    <value>New custom converter</value>
+  </data>
+  <data name="ManageCustomConverters" xml:space="preserve">
+    <value>Manage custom converters</value>
+  </data>
   <data name="Application" xml:space="preserve">
     <value>Application</value>
   </data>

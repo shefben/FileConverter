@@ -224,6 +224,9 @@ namespace FileConverter
                 case OutputType.Pdf:
                     return category == InputCategoryNames.Image || category == InputCategoryNames.Document;
 
+                case OutputType.Custom:
+                    return true;
+
                 default:
                     return false;
             }
