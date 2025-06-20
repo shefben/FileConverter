@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
-using FileConverter.ConversionPreset;
+using FileConverter;
 using FileConverter.CustomConverters;
 
 namespace FileConverter.ValueConverters
@@ -17,7 +17,7 @@ namespace FileConverter.ValueConverters
             }
 
             var option = values[0] as CustomConverterOptionDefinition;
-            var preset = values[1] as ConversionPreset.ConversionPreset;
+            var preset = values[1] as ConversionPreset;
             if (option == null || preset == null)
             {
                 return Visibility.Visible;

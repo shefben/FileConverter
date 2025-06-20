@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Windows.Data;
 using FileConverter.CustomConverters;
-using FileConverter.ConversionPreset;
+using FileConverter;
 
 namespace FileConverter.ValueConverters
 {
