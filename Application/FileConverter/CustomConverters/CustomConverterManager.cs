@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Reflection;
 
 namespace FileConverter.CustomConverters
@@ -176,7 +177,22 @@ namespace FileConverter.CustomConverters
         {
             string directory = GetDirectory();
             Directory.CreateDirectory(directory);
-            System.IO.Compression.ZipFile.ExtractToDirectory(package, directory, true);
+
+            using (ZipArchive zip = ZipFile.OpenRead(package))
+            {
+                foreach (ZipArchiveEntry entry in zip.Entries)
+                {
+                    string destinationPath = Path.Combine(directory, entry.FullName);
+                    string fullPath = Path.GetFullPath(destinationPath);
+                    if (!fullPath.StartsWith(directory, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+                    Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+                    entry.ExtractToFile(fullPath, true);
+                }
+            }
+
             converters = null;
             ConvertersUpdated?.Invoke();
         }

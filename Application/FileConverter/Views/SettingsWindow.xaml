@@ -375,7 +375,7 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TreeView Grid.Row="0" ItemsSource="{Binding RootFolder.Children}" SelectedItem="{Binding SelectedItem}">
+                    <TreeView Grid.Row="0" ItemsSource="{Binding RootFolder.Children}">
                         <TreeView.Resources>
                             <HierarchicalDataTemplate DataType="{x:Type viewModels:CustomConverterFolder}" ItemsSource="{Binding Children}">
                                 <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
@@ -387,6 +387,9 @@
                                 </StackPanel>
                             </DataTemplate>
                         </TreeView.Resources>
+                        <behaviors:Interaction.Behaviors>
+                            <views:TreeViewSelectionBehavior SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ExpandSelected="False"/>
+                        </behaviors:Interaction.Behaviors>
                     </TreeView>
 
                     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using FileConverter.CustomConverters;
 using FileConverter.Services;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -110,7 +111,7 @@ namespace FileConverter.ViewModels
             string baseDir = CustomConverterManager.GetDirectory();
             foreach (var def in this.Converters)
             {
-                string relative = string.IsNullOrEmpty(def.FilePath) ? def.Name + ".xml" : System.IO.Path.GetRelativePath(baseDir, def.FilePath);
+                string relative = string.IsNullOrEmpty(def.FilePath) ? def.Name + ".xml" : FileConverter.PathHelpers.GetRelativePath(baseDir, def.FilePath);
                 var parts = relative.Split(System.IO.Path.DirectorySeparatorChar);
                 CustomConverterFolder folder = root;
                 for (int i = 0; i < parts.Length - 1; i++)
@@ -226,9 +227,11 @@ namespace FileConverter.ViewModels
                 else
                 {
                     var serializer = new XmlSerializer(typeof(CustomConverterDefinition), new XmlRootAttribute("CustomConverter"));
-                    using StringWriter sw = new StringWriter();
-                    serializer.Serialize(sw, this.Selected);
-                    this.XmlText = sw.ToString();
+                    using (StringWriter sw = new StringWriter())
+                    {
+                        serializer.Serialize(sw, this.Selected);
+                        this.XmlText = sw.ToString();
+                    }
                 }
             }
             catch (Exception ex)
@@ -247,8 +250,11 @@ namespace FileConverter.ViewModels
             try
             {
                 var serializer = new XmlSerializer(typeof(CustomConverterDefinition), new XmlRootAttribute("CustomConverter"));
-                using StringReader sr = new StringReader(this.XmlText ?? string.Empty);
-                var def = (CustomConverterDefinition)serializer.Deserialize(sr);
+                CustomConverterDefinition def;
+                using (StringReader sr = new StringReader(this.XmlText ?? string.Empty))
+                {
+                    def = (CustomConverterDefinition)serializer.Deserialize(sr);
+                }
                 CustomConverterManager.SaveConverter(def);
                 int index = this.Converters.IndexOf(this.Selected);
                 if (index >= 0)

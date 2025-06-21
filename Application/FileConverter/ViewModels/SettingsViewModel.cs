@@ -12,6 +12,7 @@ namespace FileConverter.ViewModels
     using System.Reflection;
     using System.Windows.Data;
     using System.Windows.Input;
+    using System.Windows;
 
     using Microsoft.Win32;
     
