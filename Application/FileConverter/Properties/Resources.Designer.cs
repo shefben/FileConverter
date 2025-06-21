@@ -95,6 +95,33 @@ namespace FileConverter.Properties {
                 return ResourceManager.GetString("AddNewPreset", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to New custom converter.
+        /// </summary>
+        public static string AddCustomConverter {
+            get {
+                return ResourceManager.GetString("AddCustomConverter", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Manage custom converters.
+        /// </summary>
+        public static string ManageCustomConverters {
+            get {
+                return ResourceManager.GetString("ManageCustomConverters", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Custom presets.
+        /// </summary>
+        public static string CustomPresets {
+            get {
+                return ResourceManager.GetString("CustomPresets", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Advanced mode.
