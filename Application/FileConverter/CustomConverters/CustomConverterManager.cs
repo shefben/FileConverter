@@ -55,13 +55,14 @@ namespace FileConverter.CustomConverters
                     return;
                 }
 
-                foreach (string file in Directory.GetFiles(directory, "*.xml"))
+                foreach (string file in Directory.GetFiles(directory, "*.xml", SearchOption.AllDirectories))
                 {
                     try
                     {
                         FileConverter.XmlHelpers.LoadFromFile("CustomConverter", file, out CustomConverterDefinition def);
                         if (!string.IsNullOrEmpty(def?.Name))
                         {
+                            def.FilePath = file;
                             converters[def.Name] = def;
                         }
                     }
@@ -86,7 +87,10 @@ namespace FileConverter.CustomConverters
                 return;
             }
 
-            watcher = new FileSystemWatcher(directory, "*.xml");
+            watcher = new FileSystemWatcher(directory, "*.xml")
+            {
+                IncludeSubdirectories = true
+            };
             watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
             watcher.Changed += OnConvertersChanged;
             watcher.Created += OnConvertersChanged;
@@ -110,9 +114,15 @@ namespace FileConverter.CustomConverters
 
             EnsureLoaded();
             string directory = GetDirectory();
-            Directory.CreateDirectory(directory);
-            string file = Path.Combine(directory, def.Name + ".xml");
+            string file = def.FilePath;
+            if (string.IsNullOrEmpty(file))
+            {
+                file = Path.Combine(directory, def.Name + ".xml");
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(file));
             XmlHelpers.SaveToFile("CustomConverter", file, def);
+            def.FilePath = file;
             converters[def.Name] = def;
         }
 
@@ -121,6 +131,10 @@ namespace FileConverter.CustomConverters
             EnsureLoaded();
             string directory = GetDirectory();
             string file = Path.Combine(directory, name + ".xml");
+            if (converters.TryGetValue(name, out var def) && !string.IsNullOrEmpty(def.FilePath))
+            {
+                file = def.FilePath;
+            }
             if (File.Exists(file))
             {
                 File.Delete(file);
@@ -138,7 +152,7 @@ namespace FileConverter.CustomConverters
             }
 
             string directory = GetDirectory();
-            string xmlPath = Path.Combine(directory, name + ".xml");
+            string xmlPath = def.FilePath ?? Path.Combine(directory, name + ".xml");
 
             using (var zip = System.IO.Compression.ZipFile.Open(destination, System.IO.Compression.ZipArchiveMode.Create))
             {

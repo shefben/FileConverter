@@ -48,6 +48,7 @@ namespace FileConverter.ViewModels
         private RelayCommand removePresetCommand;
         private RelayCommand saveCommand;
         private RelayCommand<CancelEventArgs> closeCommand;
+        private ManageCustomConvertersViewModel customConvertersManager;
 
         private ListCollectionView outputTypes;
         private CultureInfo[] supportedCultures;
@@ -56,11 +57,14 @@ namespace FileConverter.ViewModels
         public event Action OnPresetCreated;
         public event Action OnFolderCreated;
 
+        public ManageCustomConvertersViewModel CustomConvertersManager => this.customConvertersManager;
+
         /// <summary>
         /// Initializes a new instance of the SettingsViewModel class.
         /// </summary>
         public SettingsViewModel()
         {
+            this.customConvertersManager = new ManageCustomConvertersViewModel();
             this.getChangeLogContentCommand = new RelayCommand(this.DownloadChangeLogAction);
             this.openUrlCommand = new RelayCommand<string>((url) => Process.Start(url));
             this.createFolderCommand = new RelayCommand(this.CreateFolder);
@@ -602,45 +606,52 @@ namespace FileConverter.ViewModels
 
         private void AddCustomConverter()
         {
-            var wizard = new Views.CustomConverterWizard()
+            try
             {
-                DataContext = new CustomConverterWizardViewModel()
-            };
-
-            if (wizard.ShowDialog() == true && wizard.DataContext is CustomConverterWizardViewModel vm)
-            {
-                var def = vm.Definition;
-                string directory = CustomConverterManager.GetDirectory();
-                System.IO.Directory.CreateDirectory(directory);
-                string filePath = System.IO.Path.Combine(directory, def.Name + ".xml");
-                XmlHelpers.SaveToFile("CustomConverter", filePath, def);
-
-                PresetFolderNode parent = this.SelectedFolder ?? this.presetsRootFolder;
-                int insertIndex = parent.Children.IndexOf(this.SelectedItem) + 1;
-                if (insertIndex < 0)
+                var wizard = new Views.CustomConverterWizard()
                 {
-                    insertIndex = parent.Children.Count;
-                }
+                    DataContext = new CustomConverterWizardViewModel()
+                };
 
-                var preset = new ConversionPreset(def.Name, OutputType.Custom, def.Extensions);
-                preset.CustomConverterName = def.Name;
-                preset.InputPostConversionAction = def.PostAction;
-                preset.OutputFileNameTemplate = def.OutputTemplate;
-                foreach (var opt in def.Options)
+                if (wizard.ShowDialog() == true && wizard.DataContext is CustomConverterWizardViewModel vm)
                 {
-                    string defaultValue = opt.DefaultValue;
-                    if (string.IsNullOrEmpty(defaultValue) && opt.Items.Count > 0)
+                    var def = vm.Definition;
+                    string directory = CustomConverterManager.GetDirectory();
+                    System.IO.Directory.CreateDirectory(directory);
+                    string filePath = System.IO.Path.Combine(directory, def.Name + ".xml");
+                    XmlHelpers.SaveToFile("CustomConverter", filePath, def);
+
+                    PresetFolderNode parent = this.SelectedFolder ?? this.presetsRootFolder;
+                    int insertIndex = parent.Children.IndexOf(this.SelectedItem) + 1;
+                    if (insertIndex < 0)
                     {
-                        defaultValue = opt.Items[0].Value;
+                        insertIndex = parent.Children.Count;
                     }
-                    preset.InitializeSettingsValue(opt.Name, defaultValue ?? string.Empty, true);
-                }
 
-                PresetNode node = new PresetNode(preset, parent);
-                parent.Children.Insert(insertIndex, node);
-                node.PropertyChanged += this.NodePropertyChanged;
-                this.SelectedItem = node;
-                this.OnPresetCreated?.Invoke();
+                    var preset = new ConversionPreset(def.Name, OutputType.Custom, def.Extensions);
+                    preset.CustomConverterName = def.Name;
+                    preset.InputPostConversionAction = def.PostAction;
+                    preset.OutputFileNameTemplate = def.OutputTemplate;
+                    foreach (var opt in def.Options)
+                    {
+                        string defaultValue = opt.DefaultValue;
+                        if (string.IsNullOrEmpty(defaultValue) && opt.Items.Count > 0)
+                        {
+                            defaultValue = opt.Items[0].Value;
+                        }
+                        preset.InitializeSettingsValue(opt.Name, defaultValue ?? string.Empty, true);
+                    }
+
+                    PresetNode node = new PresetNode(preset, parent);
+                    parent.Children.Insert(insertIndex, node);
+                    node.PropertyChanged += this.NodePropertyChanged;
+                    this.SelectedItem = node;
+                    this.OnPresetCreated?.Invoke();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
 

@@ -44,6 +44,9 @@ namespace FileConverter.CustomConverters
             }
         }
 
+        [XmlIgnore]
+        public string FilePath { get; set; }
+
         [XmlElement("PostProcessCommand")]
         public string PostProcessCommand { get; set; }
 
