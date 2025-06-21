@@ -214,5 +214,28 @@ namespace FileConverter
 
             return outputPath;
         }
+
+        public static string GetRelativePath(string baseDirectory, string filePath)
+        {
+            if (string.IsNullOrEmpty(baseDirectory) || string.IsNullOrEmpty(filePath))
+            {
+                return filePath;
+            }
+
+            Uri baseUri = new Uri(AppendDirectorySeparator(baseDirectory));
+            Uri fileUri = new Uri(filePath);
+            Uri relativeUri = baseUri.MakeRelativeUri(fileUri);
+            string relative = Uri.UnescapeDataString(relativeUri.ToString());
+            return relative.Replace('/', System.IO.Path.DirectorySeparatorChar);
+        }
+
+        private static string AppendDirectorySeparator(string path)
+        {
+            if (!path.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString()))
+            {
+                return path + System.IO.Path.DirectorySeparatorChar;
+            }
+            return path;
+        }
     }
 }
