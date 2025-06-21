@@ -8,6 +8,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
+using System.IO;
+using System.Xml.Serialization;
 
 namespace FileConverter.ViewModels
 {
@@ -15,6 +17,7 @@ namespace FileConverter.ViewModels
     {
         private CustomConverterDefinition selected;
         private ConversionPreset selectedCustomPreset;
+        private string xmlText;
 
         public ManageCustomConvertersViewModel()
         {
@@ -31,6 +34,7 @@ namespace FileConverter.ViewModels
             this.importCommand = new RelayCommand(this.ImportConverter);
             this.exportCommand = new RelayCommand(this.ExportSelected, () => this.Selected != null);
             this.addCommand = new RelayCommand(this.AddConverter);
+            this.saveXmlCommand = new RelayCommand(this.SaveXml, () => this.Selected != null);
         }
 
         public ObservableCollection<CustomConverterDefinition> Converters { get; private set; }
@@ -45,6 +49,8 @@ namespace FileConverter.ViewModels
                     (this.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (this.EditCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (this.ExportCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (this.SaveXmlCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    this.LoadSelectedXml();
                 }
             }
         }
@@ -59,6 +65,8 @@ namespace FileConverter.ViewModels
         public ICommand ExportCommand => this.exportCommand;
         private readonly RelayCommand addCommand;
         public ICommand AddCommand => this.addCommand;
+        private readonly RelayCommand saveXmlCommand;
+        public ICommand SaveXmlCommand => this.saveXmlCommand;
 
         public ObservableCollection<ConversionPreset> CustomPresets { get; private set; }
 
@@ -66,6 +74,12 @@ namespace FileConverter.ViewModels
         {
             get => this.selectedCustomPreset;
             set => this.SetProperty(ref this.selectedCustomPreset, value);
+        }
+
+        public string XmlText
+        {
+            get => this.xmlText;
+            set => this.SetProperty(ref this.xmlText, value);
         }
 
         private void RemoveSelected()
@@ -134,6 +148,62 @@ namespace FileConverter.ViewModels
                 CustomConverterManager.SaveConverter(vm.Definition);
                 this.Converters.Add(vm.Definition);
                 this.Selected = vm.Definition;
+            }
+        }
+
+        private void LoadSelectedXml()
+        {
+            if (this.Selected == null)
+            {
+                this.XmlText = string.Empty;
+                return;
+            }
+
+            try
+            {
+                string directory = CustomConverterManager.GetDirectory();
+                string file = Path.Combine(directory, this.Selected.Name + ".xml");
+                if (File.Exists(file))
+                {
+                    this.XmlText = File.ReadAllText(file);
+                }
+                else
+                {
+                    var serializer = new XmlSerializer(typeof(CustomConverterDefinition), new XmlRootAttribute("CustomConverter"));
+                    using StringWriter sw = new StringWriter();
+                    serializer.Serialize(sw, this.Selected);
+                    this.XmlText = sw.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                this.XmlText = "<!-- " + ex.Message + " -->";
+            }
+        }
+
+        private void SaveXml()
+        {
+            if (this.Selected == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var serializer = new XmlSerializer(typeof(CustomConverterDefinition), new XmlRootAttribute("CustomConverter"));
+                using StringReader sr = new StringReader(this.XmlText ?? string.Empty);
+                var def = (CustomConverterDefinition)serializer.Deserialize(sr);
+                CustomConverterManager.SaveConverter(def);
+                int index = this.Converters.IndexOf(this.Selected);
+                if (index >= 0)
+                {
+                    this.Converters[index] = def;
+                }
+                this.Selected = def;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
     }
