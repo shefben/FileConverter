@@ -149,12 +149,6 @@
     <Compile Include="Services\IUpgradeService.cs"/>
     <Compile Include="Services\NavigationService.cs"/>
     <Compile Include="PathHelpers.cs"/>
-    <Compile Include="Properties\Resources.en.Designer.cs">
-      <DependentUpon>Resources.en.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="Registry.cs"/>
     <Compile Include="Pages.cs"/>
     <Compile Include="Services\SettingsService.Migration.cs"/>
@@ -319,10 +313,7 @@
     <EmbeddedResource Include="Properties\Resources.he-IL.resx"/>
     <EmbeddedResource Include="Properties\Resources.hi-IN.resx"/>
     <EmbeddedResource Include="Properties\Resources.es-ES.resx"/>
-    <EmbeddedResource Include="Properties\Resources.en.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.en.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.en.resx" />
     <EmbeddedResource Include="Properties\Resources.fr-FR.resx"/>
     <EmbeddedResource Include="Properties\Resources.it-IT.resx"/>
     <EmbeddedResource Include="Properties\Resources.ja-jp.resx"/>

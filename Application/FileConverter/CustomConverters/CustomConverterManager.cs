@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Reflection;
 
 namespace FileConverter.CustomConverters
@@ -163,7 +162,7 @@ namespace FileConverter.CustomConverters
         {
             string directory = GetDirectory();
             Directory.CreateDirectory(directory);
-            System.IO.Compression.ZipFile.ExtractToDirectory(package, directory);
+            System.IO.Compression.ZipFile.ExtractToDirectory(package, directory, true);
             converters = null;
             ConvertersUpdated?.Invoke();
         }

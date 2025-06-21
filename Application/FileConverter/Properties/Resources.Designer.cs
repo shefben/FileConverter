@@ -113,6 +113,15 @@ namespace FileConverter.Properties {
                 return ResourceManager.GetString("ManageCustomConverters", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Custom presets.
+        /// </summary>
+        public static string CustomPresets {
+            get {
+                return ResourceManager.GetString("CustomPresets", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Advanced mode.
